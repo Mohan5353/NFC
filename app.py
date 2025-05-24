@@ -21,9 +21,8 @@ def set_command():
 def check_command():
     global latest_command
     if latest_command:
-        cmd = latest_command
+        return jsonify({"command": latest_command})
         latest_command = None
-        return jsonify({"command": cmd})
     else:
         return jsonify({"command": None})
 
