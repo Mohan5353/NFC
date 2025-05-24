@@ -4,22 +4,28 @@ from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-trigger = False
+latest_command = None
 
 @app.route('/trigger', methods=['POST'])
-def set_trigger():
-    global trigger
-    trigger = True
-    return jsonify({"status": "trigger set"})
+def set_command():
+    global latest_command
+    data = request.get_json()
+    command = data.get("command")
+    if command:
+        latest_command = command
+        return jsonify({"status": "command received", "command": command})
+    else:
+        return jsonify({"error": "No command provided"}), 400
 
 @app.route('/check', methods=['GET'])
-def check_trigger():
-    global trigger
-    if trigger:
-        trigger = False
-        return jsonify({"trigger": True})
+def check_command():
+    global latest_command
+    if latest_command:
+        cmd = latest_command
+        latest_command = None
+        return jsonify({"command": cmd})
     else:
-        return jsonify({"trigger": False})
+        return jsonify({"command": None})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
