@@ -9,6 +9,7 @@ latest_command = None
 
 @app.route('/trigger', methods=['POST'])
 def trigger():
+    global latest_command
     try:
         # Try to parse as real JSON
         data = request.get_json(force=True)
