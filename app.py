@@ -1,15 +1,27 @@
-# app.py
-
 from flask import Flask, request, jsonify
 import json
+import os
 
 app = Flask(__name__)
 
-latest_command = None
+COMMAND_FILE = "latest_command.json"
+
+def save_command(command):
+    with open(COMMAND_FILE, "w") as f:
+        json.dump({"command": command}, f)
+
+def load_command():
+    if os.path.exists(COMMAND_FILE):
+        with open(COMMAND_FILE, "r") as f:
+            return json.load(f).get("command")
+    return None
+
+def clear_command():
+    if os.path.exists(COMMAND_FILE):
+        os.remove(COMMAND_FILE)
 
 @app.route('/trigger', methods=['POST'])
 def trigger():
-    global latest_command
     try:
         # Try to parse as real JSON
         data = request.get_json(force=True)
@@ -23,19 +35,18 @@ def trigger():
 
     command = data.get("command")
     if command:
-        # Log or handle command
         print(f"Received command: {command}")
-        latest_command=command
+        save_command(command)
         return jsonify({"status": "command received", "command": command}), 200
     else:
         return jsonify({"error": "No command provided"}), 400
 
 @app.route('/check', methods=['GET'])
 def check_command():
-    global latest_command
-    if latest_command:
-        return jsonify({"command": latest_command})
-        latest_command = None
+    command = load_command()
+    if command:
+        clear_command()  # Optional: clear after check
+        return jsonify({"command": command})
     else:
         return jsonify({"command": None})
 
