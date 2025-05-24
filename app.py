@@ -24,7 +24,7 @@ def trigger():
     command = data.get("command")
     if command:
         # Log or handle command
-        print(f"Received command: {type(command)}")
+        print(f"Received command: {command}")
         latest_command=command
         return jsonify({"status": "command received", "command": command}), 200
     else:
